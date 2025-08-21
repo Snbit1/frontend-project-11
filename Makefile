@@ -1,4 +1,4 @@
-.PHONY: lint lint-fix format
+.PHONY: lint lint-fix format dev
 
 lint:
 	npx eslint . --ext .js,.mjs,.cjs
@@ -8,3 +8,6 @@ lint-fix:
 
 format:
 	npx prettier --write .
+
+dev:
+	npm run dev
