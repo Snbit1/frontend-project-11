@@ -1,7 +1,11 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import * as yup from 'yup'
 import initView from './view.js'
 import i18next from './locales.js'
+import fetchRss from './api.js'
+import parseRss from './parser.js'
+import generateId from './utils.js'
 
 i18next.init().then(() => {
 
@@ -38,21 +42,72 @@ document.querySelector('#app').innerHTML = `
     </div>
   </div>
 </div>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-10 col-lg-8 mx-auto">
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <div class="card border-0" style="display: none;" id="postsCard">
+            <div class="card-body">
+              <h2 class="card-title h4">${i18next.t('posts.title')}</h2>
+              <ul class="list-group list-group-flush posts"></ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card border-0" style="display: none;" id="feedsCard">
+            <div class="card-body">
+              <h2 class="card-title h4">${i18next.t('feeds.title')}</h2>
+              <ul class="list-group list-group-flush feeds"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="postModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">${i18next.t('modal.title')}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${i18next.t('modal.close')}"></button>
+      </div>
+      <div class="modal-body">
+        ${i18next.t('modal.description')}
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn btn-primary" target="_blank" rel="noopener noreferrer">${i18next.t('modal.readFull')}</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${i18next.t('modal.close')}</button>
+      </div>
+    </div>
+  </div>
+</div>
 `
 
 const elements = {
   form: document.querySelector('.rss-form'),
   input: document.querySelector('#url-input'),
   feedback: document.querySelector('.feedback'),
+  submit: document.querySelector('button[type="submit"]'),
+  feedsContainer: document.querySelector('.feeds'),
+  postsContainer: document.querySelector('.posts')
 }
+
+elements.feedsContainer.innerHTML = ''
+elements.postsContainer.innerHTML = ''
 
 const state = {
   form: {
     error: null,
     valid: false,
-    success: null
+    success: null,
+    loading: false
   },
   feeds: [],
+  posts: []
 }
 
 const watchedState = initView(state, elements)
@@ -60,7 +115,7 @@ const watchedState = initView(state, elements)
 const makeSchema = (feeds) => yup
   .string()
   .url(() => i18next.t('form.urlInvalid'))
-  .notOneOf(feeds, () => i18next.t('form.urlExists'))
+  .notOneOf(feeds.map(f => f.url), () => i18next.t('form.urlExists'))
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault()
@@ -71,18 +126,64 @@ const makeSchema = (feeds) => yup
 
     watchedState.form.error = null
     watchedState.form.success = null
+    watchedState.form.loading = true
 
     schema.validate(url)
-      .then(() => {
-        watchedState.form.valid = true
+      .then(() => fetchRss(url))
+      .then((xmlString) => parseRss(xmlString))
+      .then((data) => {
+        const feedId = generateId()
+
+        watchedState.feeds.push({
+          id: feedId,
+          url,
+          title: data.feed.title,
+          description: data.feed.description,
+        })
+
+        const posts = data.items.map((item) => ({
+        id: generateId(),
+        feedId,
+        title: item.title,
+        link: item.link,
+        description: item.description,
+        }))
+
+        watchedState.posts.push(...posts)
+
         watchedState.form.success = i18next.t('form.success')
-        watchedState.feeds.push(url)
         elements.form.reset()
         elements.input.focus()
       })
       .catch((err) => {
-        watchedState.form.valid = false
-        watchedState.form.error = err.message
+        if (err.isParseError) {
+          watchedState.form.error = i18next.t('form.parseError')
+        } else {
+           watchedState.form.error = err.message
+        }
       })
+      .finally(() => {
+        watchedState.form.loading = false
+      })
+  })
+
+  const modal = document.getElementById('postModal')
+  const modalTitle = modal.querySelector('.modal-title')
+  const modalBody = modal.querySelector('.modal-body')
+  const modalLink = modal.querySelector('.modal-footer a')
+
+  elements.postsContainer.addEventListener('click', (e) => {
+    const button = e.target.closest('button')
+    if (!button) return
+
+    const postId = button.getAttribute('data-id')
+    const post = watchedState.posts.find((p) => p.id.toString() === postId)
+
+    if (!post) return
+
+    modalTitle.textContent = post.title
+    modalBody.textContent = post.description
+    modalLink.href = post.link
+  
   })
 })
