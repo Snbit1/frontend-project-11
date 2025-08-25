@@ -157,7 +157,9 @@ const makeSchema = (feeds) => yup
         elements.input.focus()
       })
       .catch((err) => {
-        if (err.isParseError) {
+        if (err.name === 'ValidationError') {
+          watchedState.form.error = err.message
+        } else if (err.isParseError) {
           watchedState.form.error = i18next.t('errors.parse')
         } else {
           watchedState.form.error = i18next.t('errors.network')
