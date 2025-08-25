@@ -9,6 +9,13 @@ export default function parseRss(xmlString) {
         throw err
     }
 
+    const channel = doc.querySelector('channel')
+        if (!channel) {
+            const err = new Error('noRss')
+            err.isParseError = true
+            throw err
+    }
+
     const getText = (el) => (el ? el.textContent.trim() : '')
 
     const title = getText(doc.querySelector('channel > title'))

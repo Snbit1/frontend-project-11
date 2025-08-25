@@ -158,15 +158,15 @@ const makeSchema = (feeds) => yup
       })
       .catch((err) => {
         if (err.isParseError) {
-          watchedState.form.error = i18next.t('form.parseError')
+          watchedState.form.error = i18next.t('errors.parse')
         } else {
-           watchedState.form.error = err.message
+          watchedState.form.error = i18next.t('errors.network')
         }
       })
       .finally(() => {
         watchedState.form.loading = false
       })
-  })
+    })
 
   const modal = document.getElementById('postModal')
   const modalTitle = modal.querySelector('.modal-title')
