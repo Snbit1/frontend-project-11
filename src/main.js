@@ -147,6 +147,7 @@ const makeSchema = (feeds) => yup
         title: item.title,
         link: item.link,
         description: item.description,
+        read: false,
         }))
 
         watchedState.posts.push(...posts)
@@ -184,6 +185,38 @@ const makeSchema = (feeds) => yup
     modalTitle.textContent = post.title
     modalBody.textContent = post.description
     modalLink.href = post.link
-  
+
+    post.read = true
+    watchedState.posts = [...watchedState.posts]
   })
+
+  const pollFeeds = () => {
+    const promises = watchedState.feeds.map((feed) => 
+    fetchRss(feed.url)
+    .then(parseRss)
+    .then((data) => {
+      const existingLinks = watchedState.posts.map((p) => p.link)
+      const newPosts = data.items
+        .filter((item) => !existingLinks.includes(item.link))
+        .map((item) => ({
+          id: generateId(),
+          feedId: feed.id,
+          title: item.title,
+          link: item.link,
+          description: item.description,
+          read: false,
+        }))
+        if (newPosts.length > 0) {
+          watchedState.posts.unshift(...newPosts)
+        }
+    })
+    .catch((err) => {
+      console.error('Ошибка при обновлении фида:', err)
+    })
+    )
+    Promise.all(promises).finally(() => {
+      setTimeout(pollFeeds, 5000)
+    })
+  }
+  pollFeeds()
 })

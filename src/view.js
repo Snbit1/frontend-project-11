@@ -49,7 +49,12 @@ export default (state, elements) => {
             a.textContent = post.title
             a.target = '_blank'
             a.rel = 'noopener noreferrer'
-            a.classList.add('fw-bold')
+
+            if (post.read) {
+                a.classList.add('fw-normal', 'link-secondary')
+            } else {
+                a.classList.add('fw-bold')
+            }
 
             const button = document.createElement('button')
             button.type = 'button'
