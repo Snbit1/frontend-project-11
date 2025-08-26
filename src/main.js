@@ -8,18 +8,16 @@ import parseRss from './parser.js'
 import generateId from './utils.js'
 
 i18next.init().then(() => {
+  yup.setLocale({
+    string: {
+        url: () => i18next.t('form.urlInvalid'),
+    },
+    mixed: {
+        notOneOf: () => i18next.t('form.urlExists'),
+    }
+  })
 
-
-yup.setLocale({
-  string: {
-    url: () => i18next.t('form.urlInvalid')
-  },
-  mixed: {
-    notOneOf: () => i18next.t('form.urlExists')
-  }
-})
-
-document.querySelector('#app').innerHTML = `
+  document.querySelector('#app').innerHTML = `
 <div class="container-fluid bg-dark p-5">
   <div class="row">
     <div class="col-md-10 col-lg-8 mx-auto text-white">
@@ -87,35 +85,35 @@ document.querySelector('#app').innerHTML = `
 </div>
 `
 
-const elements = {
-  form: document.querySelector('.rss-form'),
-  input: document.querySelector('#url-input'),
-  feedback: document.querySelector('.feedback'),
-  submit: document.querySelector('button[type="submit"]'),
-  feedsContainer: document.querySelector('.feeds'),
-  postsContainer: document.querySelector('.posts')
-}
+  const elements = {
+    form: document.querySelector('.rss-form'),
+    input: document.querySelector('#url-input'),
+    feedback: document.querySelector('.feedback'),
+    submit: document.querySelector('button[type="submit"]'),
+    feedsContainer: document.querySelector('.feeds'),
+    postsContainer: document.querySelector('.posts'),
+  }
 
-elements.feedsContainer.innerHTML = ''
-elements.postsContainer.innerHTML = ''
+  elements.feedsContainer.innerHTML = ''
+  elements.postsContainer.innerHTML = ''
 
-const state = {
-  form: {
-    error: null,
-    valid: false,
-    success: null,
-    loading: false
-  },
-  feeds: [],
-  posts: []
-}
+  const state = {
+    form: {
+      error: null,
+      valid: false,
+      success: null,
+      loading: false,
+    },
+    feeds: [],
+    posts: [],
+  }
 
-const watchedState = initView(state, elements)
+  const watchedState = initView(state, elements)
 
-const makeSchema = (feeds) => yup
-  .string()
-  .url(() => i18next.t('form.urlInvalid'))
-  .notOneOf(feeds.map(f => f.url), () => i18next.t('form.urlExists'))
+  const makeSchema = feeds => yup
+    .string()
+    .url(() => i18next.t('form.urlInvalid'))
+    .notOneOf(feeds.map(f => f.url), () => i18next.t('form.urlExists'))
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault()
@@ -130,7 +128,7 @@ const makeSchema = (feeds) => yup
 
     schema.validate(url)
       .then(() => fetchRss(url))
-      .then((xmlString) => parseRss(xmlString))
+      .then(xmlString => parseRss(xmlString))
       .then((data) => {
         const feedId = generateId()
 
@@ -141,13 +139,13 @@ const makeSchema = (feeds) => yup
           description: data.feed.description,
         })
 
-        const posts = data.items.map((item) => ({
-        id: generateId(),
-        feedId,
-        title: item.title,
-        link: item.link,
-        description: item.description,
-        read: false,
+        const posts = data.items.map(item => ({
+          id: generateId(),
+          feedId,
+          title: item.title,
+          link: item.link,
+          description: item.description,
+          read: false,
         }))
 
         watchedState.posts.push(...posts)
@@ -159,16 +157,18 @@ const makeSchema = (feeds) => yup
       .catch((err) => {
         if (err.name === 'ValidationError') {
           watchedState.form.error = err.message
-        } else if (err.isParseError) {
+        }
+        else if (err.isParseError) {
           watchedState.form.error = i18next.t('errors.parse')
-        } else {
+        }
+        else {
           watchedState.form.error = i18next.t('errors.network')
         }
       })
       .finally(() => {
         watchedState.form.loading = false
       })
-    })
+  })
 
   const modal = document.getElementById('postModal')
   const modalTitle = modal.querySelector('.modal-title')
@@ -180,7 +180,7 @@ const makeSchema = (feeds) => yup
     if (!button) return
 
     const postId = button.getAttribute('data-id')
-    const post = watchedState.posts.find((p) => p.id.toString() === postId)
+    const post = watchedState.posts.find(p => p.id.toString() === postId)
 
     if (!post) return
 
@@ -193,28 +193,28 @@ const makeSchema = (feeds) => yup
   })
 
   const pollFeeds = () => {
-    const promises = watchedState.feeds.map((feed) => 
-    fetchRss(feed.url)
-    .then(parseRss)
-    .then((data) => {
-      const existingLinks = watchedState.posts.map((p) => p.link)
-      const newPosts = data.items
-        .filter((item) => !existingLinks.includes(item.link))
-        .map((item) => ({
-          id: generateId(),
-          feedId: feed.id,
-          title: item.title,
-          link: item.link,
-          description: item.description,
-          read: false,
-        }))
-        if (newPosts.length > 0) {
-          watchedState.posts.unshift(...newPosts)
-        }
-    })
-    .catch((err) => {
-      console.error('Ошибка при обновлении фида:', err)
-    })
+    const promises = watchedState.feeds.map(feed =>
+      fetchRss(feed.url)
+        .then(parseRss)
+        .then((data) => {
+          const existingLinks = watchedState.posts.map(p => p.link)
+          const newPosts = data.items
+            .filter(item => !existingLinks.includes(item.link))
+            .map(item => ({
+              id: generateId(),
+              feedId: feed.id,
+              title: item.title,
+              link: item.link,
+              description: item.description,
+              read: false,
+            }))
+          if (newPosts.length > 0) {
+            watchedState.posts.unshift(...newPosts)
+          }
+        })
+        .catch((err) => {
+          console.error('Ошибка при обновлении фида:', err)
+        })
     )
     Promise.all(promises).finally(() => {
       setTimeout(pollFeeds, 5000)

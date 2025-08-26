@@ -1,10 +1,11 @@
-import js from "@eslint/js";
-import globals from "globals";
-import { defineConfig } from "eslint/config";
-import prettier from 'eslint-config-prettier';
+import js from '@eslint/js'
+import globals from 'globals'
+import { defineConfig } from 'eslint/config'
+import prettier from 'eslint-config-prettier'
 
 export default defineConfig([
   {
+    ignores: ["dist/**"],
     files: ['**/*.{js,mjs,cjs}'],
     languageOptions: {
       globals: {
@@ -15,7 +16,7 @@ export default defineConfig([
       },
       parserOptions: {
         ecmaVersion: 12,
-        sourceType: "module",
+        sourceType: 'module',
       },
     },
     extends: [
@@ -28,4 +29,5 @@ export default defineConfig([
       'linebreak-style': ['error', 'unix'],
     },
   },
-]);
+])
+
