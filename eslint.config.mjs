@@ -5,7 +5,7 @@ import prettier from 'eslint-config-prettier'
 
 export default defineConfig([
   {
-    ignores: ["dist/**"],
+    ignores: ['dist/**'],
     files: ['**/*.{js,mjs,cjs}'],
     languageOptions: {
       globals: {
@@ -30,4 +30,3 @@ export default defineConfig([
     },
   },
 ])
-

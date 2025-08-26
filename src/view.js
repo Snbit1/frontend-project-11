@@ -23,7 +23,7 @@ export default (state, elements) => {
 
       const description = document.createElement('p')
       description.textContent = feed.description
-            description.classList.add('mb-0')
+      description.classList.add('mb-0')
 
       li.append(title, description)
       feedsContainer.append(li)
@@ -73,7 +73,6 @@ export default (state, elements) => {
   let isFirstRender = true
 
   return onChange(state, (path, value) => {
-
     if (isFirstRender) {
       isFirstRender = false
       return

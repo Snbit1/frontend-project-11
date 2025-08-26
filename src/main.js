@@ -10,11 +10,11 @@ import generateId from './utils.js'
 i18next.init().then(() => {
   yup.setLocale({
     string: {
-        url: () => i18next.t('form.urlInvalid'),
+      url: () => i18next.t('form.urlInvalid'),
     },
     mixed: {
-        notOneOf: () => i18next.t('form.urlExists'),
-    }
+      notOneOf: () => i18next.t('form.urlExists'),
+    },
   })
 
   document.querySelector('#app').innerHTML = `
@@ -214,7 +214,7 @@ i18next.init().then(() => {
         })
         .catch((err) => {
           console.error('Ошибка при обновлении фида:', err)
-        })
+        }),
     )
     Promise.all(promises).finally(() => {
       setTimeout(pollFeeds, 5000)
