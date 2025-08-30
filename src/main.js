@@ -17,73 +17,10 @@ i18next.init().then(() => {
     },
   })
 
-  document.querySelector('#app').innerHTML = `
-<div class="container-fluid bg-dark p-5">
-  <div class="row">
-    <div class="col-md-10 col-lg-8 mx-auto text-white">
-      <h1 class="display-3 mb-0">${i18next.t('header.title')}</h1>
-      <p class="lead">${i18next.t('header.subtitle')}</p>
-      <form class="rss-form text-body" action="" novalidate>
-        <div class="row">
-          <div class="col">
-            <div class="form-floating">
-              <input id="url-input" class="form-control" autofocus="" type="text" name="url" aria-label="url" placeholder="${i18next.t('form.urlPlaceholder')}" autocomplete="off">
-              <label for="url-input">${i18next.t('form.urlLabel')}</label>
-            </div>
-            <p class="feedback m-2 small text-danger" style="min-height: 1.5rem;"></p>
-          </div>
-          <div class="col-auto">
-            <button class="btn btn-lg btn-primary px-sm-5" style="height: 3.7rem;" type="submit" aria-label="add">${i18next.t('form.add')}</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-md-10 col-lg-8 mx-auto">
-      <div class="row mt-4">
-        <div class="col-md-6">
-          <div class="card border-0" style="display: none;" id="postsCard">
-            <div class="card-body">
-              <h2 class="card-title h4">${i18next.t('posts.title')}</h2>
-              <ul class="list-group list-group-flush posts"></ul>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div class="card border-0" style="display: none;" id="feedsCard">
-            <div class="card-body">
-              <h2 class="card-title h4">${i18next.t('feeds.title')}</h2>
-              <ul class="list-group list-group-flush feeds"></ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="postModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">${i18next.t('modal.title')}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${i18next.t('modal.close')}"></button>
-      </div>
-      <div class="modal-body">
-        ${i18next.t('modal.description')}
-      </div>
-      <div class="modal-footer">
-        <a href="#" class="btn btn-primary" target="_blank" rel="noopener noreferrer">${i18next.t('modal.readFull')}</a>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${i18next.t('modal.close')}</button>
-      </div>
-    </div>
-  </div>
-</div>
-`
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    const key = el.getAttribute('data-i18n')
+    el.textContent = i18next.t(key)
+  })
 
   const elements = {
     form: document.querySelector('.rss-form'),
@@ -161,8 +98,11 @@ i18next.init().then(() => {
         else if (err.isParseError) {
           watchedState.form.error = i18next.t('errors.parse')
         }
-        else {
+        else if (err.isNetworkError) {
           watchedState.form.error = i18next.t('errors.network')
+        }
+        else {
+          watchedState.form.error = i18next.t('errors.unknown')
         }
       })
       .finally(() => {

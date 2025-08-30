@@ -7,7 +7,69 @@
     <title>Vite App</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div class="container-fluid bg-dark p-5">
+    <div class="row">
+      <div class="col-md-10 col-lg-8 mx-auto text-white">
+        <h1 class="display-3 mb-0" data-i18n="header.title"></h1>
+        <p class="lead" data-i18n="header.subtitle"></p>
+        <form class="rss-form text-body" action="" novalidate>
+          <div class="row">
+            <div class="col">
+              <div class="form-floating">
+                <input id="url-input" class="form-control" autofocus="" type="text" name="url" aria-label="url" autocomplete="off">
+                <label for="url-input" data-i18n="form.urlLabel"></label>
+              </div>
+              <p class="feedback m-2 small text-danger" style="min-height: 1.5rem;"></p>
+            </div>
+            <div class="col-auto">
+              <button class="btn btn-lg btn-primary px-sm-5" style="height: 3.7rem;" type="submit" aria-label="add" data-i18n="form.add"></button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-10 col-lg-8 mx-auto">
+        <div class="row mt-4">
+          <div class="col-md-6">
+            <div class="card border-0" style="display: none;" id="postsCard">
+              <div class="card-body">
+                <h2 class="card-title h4" data-i18n="posts.title"></h2>
+                <ul class="list-group list-group-flush posts"></ul>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card border-0" style="display: none;" id="feedsCard">
+              <div class="card-body">
+                <h2 class="card-title h4" data-i18n="feeds.title"></h2>
+                <ul class="list-group list-group-flush feeds"></ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="postModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" data-i18n="modal.title"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" data-i18n="modal.close"></button>
+        </div>
+        <div class="modal-body" data-i18n="modal.description"></div>
+        <div class="modal-footer">
+          <a href="#" class="btn btn-primary" target="_blank" rel="noopener noreferrer" data-i18n="modal.readFull"></a>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="modal.close"></button>
+        </div>
+      </div>
+    </div>
+  </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

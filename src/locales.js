@@ -26,6 +26,7 @@ i18next.init({
         errors: {
           network: 'Ошибка сети',
           parse: 'Ресурс не содержит валидный RSS',
+          unknown: 'Неизвестная ошибка',
         },
         feeds: {
           title: 'Фиды',
